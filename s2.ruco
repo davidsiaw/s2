@@ -1,0 +1,25 @@
+token "StructName", :pascal_case, nil
+token "MemberName", :camel_case, nil
+
+grammar "ArrayAnnotation" do
+	one "["
+	one "]"
+end
+
+grammar "Member" do
+	one StructName
+	maybe ArrayAnnotation
+	one MemberName
+end
+
+grammar "Structure" do
+	one "struct"
+	one StructName
+	one "{"
+	many Member
+	one "}"
+end
+
+variation "Statement", Structure
+
+maybemany Statement

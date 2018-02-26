@@ -1,0 +1,13 @@
+struct PMX
+{
+	Uint32 magic
+	Uint8 somebyte
+	Int16[] numbers
+	Meow meow
+}
+
+struct Meow
+{
+	Uint32 power
+	Int8 hello
+}
