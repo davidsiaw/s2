@@ -1,20 +1,47 @@
+token "TypeVariable", :custom, "'$' bigletter { bigletter | letter | digit }"
 token "StructName", :pascal_case, nil
 token "MemberName", :camel_case, nil
 
-grammar "ArrayAnnotation" do
-	one "["
-	one "]"
+grammar "TypeIdentifier" do
+	either StructName, TypeVariable
+	maybe TypeParameterArguments
+end
+
+variation "TypeExpression", TypeIdentifier
+
+grammar "TypeParameterArguments" do
+	one "<"
+	one TypeExpression
+	maybemany group {
+		one ","
+		one TypeExpression
+	}
+	one ">"
+end
+
+grammar "TypeDeclaration" do
+	one StructName
+	maybe TypeParameters
+end
+
+grammar "TypeParameters" do
+	one "<"
+	one TypeVariable
+	maybemany group {
+		one ","
+		one TypeVariable
+	}
+	one ">"
 end
 
 grammar "Member" do
-	one StructName
-	maybe ArrayAnnotation
+	one TypeIdentifier
 	one MemberName
 end
 
 grammar "Structure" do
 	one "struct"
-	one StructName
+	one TypeDeclaration
 	one "{"
 	many Member
 	one "}"

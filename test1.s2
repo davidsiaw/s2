@@ -1,13 +1,42 @@
-struct PMX
+struct Header
 {
 	Uint32 magic
-	Uint8 somebyte
-	Int16[] numbers
-	Meow meow
 }
 
-struct Meow
+struct SomeFormat
 {
-	Uint32 power
-	Int8 hello
+	Header header
+	Uint16 something
+	Uint16 something2
+}
+
+struct Box<$T>
+{
+	$T something
+	Uint8 number
+}
+
+struct Pair<$T1, $T2>
+{
+	$T1 first
+	$T2 second
+}
+
+struct Boxuse
+{
+	Box<Uint32> box
+	Box<Uint8> box2
+	Pair<Header, SomeFormat> weirdPair
+	Pair<Header, Pair<Uint32, Uint16>> anotherPair
+}
+
+struct Collection<$T>
+{
+	$T head
+	Pair<$T,$T> pair
+}
+
+struct Music
+{
+	Collection< Pair<Uint32, Uint16> > notes
 }

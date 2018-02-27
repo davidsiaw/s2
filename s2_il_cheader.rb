@@ -21,19 +21,26 @@ typedef struct _tag_#{structure_name} #{structure_name};
 
 end
 
+
 puts <<-HEADER
 #ifndef #{header_define}
 #define #{header_define}
+
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
+#ifndef S2_RUNTIME
+#define S2_RUNTIME
 typedef enum
 {
 	#{error_types.join(",\n\t")}
 } S2Error;
+
+#endif /* S2_RUNTIME */
 
 #{structure_defines}
 

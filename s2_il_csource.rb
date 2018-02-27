@@ -18,16 +18,9 @@ struct["structures"].each do |structure_name, structure|
 		field_name = field["name"]
 		field_type = c_type(field["type"])
 
-		if field["is_array"]
-			member_defines += <<-MEMBER
-	#{field_type}* BUFFER_#{field_name};
-	size_t COUNT_#{field_name};
-			MEMBER
-		else
-			member_defines += <<-MEMBER
+		member_defines += <<-MEMBER
 	#{field_type} #{field_name};
-			MEMBER
-		end
+		MEMBER
 
 	end
 
