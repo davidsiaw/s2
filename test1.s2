@@ -40,3 +40,9 @@ struct Music
 {
 	Collection< Pair<Uint32, Uint16> > notes
 }
+
+[BigEndian]
+struct AttributeTest
+{
+	Uint32 number
+}

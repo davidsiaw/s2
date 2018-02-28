@@ -39,7 +39,14 @@ grammar "Member" do
 	one MemberName
 end
 
+grammar "Attribute" do
+	one "["
+	one TypeExpression
+	one "]"
+end
+
 grammar "Structure" do
+	maybemany Attribute
 	one "struct"
 	one TypeDeclaration
 	one "{"
