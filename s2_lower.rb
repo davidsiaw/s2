@@ -51,71 +51,72 @@ def rewrite_member(member, type_arguments, type_variables, output, generic_struc
 
 end
 
-def instantiate_type(typeident, output, generic_structures)
-	if typeident["typeparameterarguments"].length == 1
-		
-		type_arguments = []
+def construct_struct(typeident, output, generic_structures)
 
-		instance_name = typeident["structname"]["_token"] + "Of" + 
+	type_arguments = []
+	type_variables = {}
+
+	instance_name = typeident["structname"]["_token"]
+
+	# type already instantiated
+	if output["structures"].has_key?(instance_name)
+		return instance_name
+	end
+
+	structure = generic_structures[typeident["structname"]["_token"]]
+
+	if typeident["typeparameterarguments"]
+		instance_name += "Of" + 
 			typeident["typeparameterarguments"][0]["typeexpressions"].map do |typeexpr|
 				type_arguments << typeexpr["_content"]				
 
 				instantiate_type(typeexpr["_content"], output, generic_structures)
-			end.join("And")
-
-		structure = generic_structures[typeident["structname"]["_token"]]
-
-		type_variables = {}
+			end.join("And") 
 
 		structure["typedeclaration"]["typeparameters"][0]["typevariables"].each_with_index do |typevar, idx|
 			type_variables[typevar["_token"]] = idx
 		end
+	end
 
-		thing = {
-			"fields" => []
-		}
+	thing = {
+		"fields" => []
+	}
 
-		structure["members"].each do |member|
-			field = {}
+	structure["members"].each do |member|
+		field = {}
 
-			member = rewrite_member(member, type_arguments, type_variables, output, generic_structures)
+		member = rewrite_member(member, type_arguments, type_variables, output, generic_structures)
 
-			field["name"] = member["membername"]["_token"]
+		field["name"] = member["membername"]["_token"]
 
-			field["type"] = instantiate_type(member["typeidentifier"], output, generic_structures)
+		field["type"] = instantiate_type(member["typeidentifier"], output, generic_structures)
 
-			thing["fields"] << field
-		end
+		thing["fields"] << field
+	end
 
-		output["structures"][instance_name] = thing
+	output["structures"][instance_name] = thing
 
-		instance_name
+	instance_name
+end
+
+def instantiate_type(typeident, output, generic_structures)
+
+	if typeident["typeparameterarguments"].length == 1
 		
+		construct_struct(typeident, output, generic_structures)
 	else
 		typeident["structname"]["_token"]
 	end
 end
 
 def process_structure(structure, output, generic_structures)
-	thing = {
-		"fields" => []
-	}
-	structure["members"].each do |member|
-		field = {}
 
-		field["name"] = member["membername"]["_token"]
-		field["type"] = instantiate_type(member["typeidentifier"], output, generic_structures)
-
-		thing["fields"] << field
-	end
-
-	output["structures"][structure["typedeclaration"]["structname"]["_token"]] = thing
+	construct_struct(structure["typedeclaration"], output, generic_structures)
 end
 
-#collect generic structures
+#collect structures
 ast["statements"].select do |statement|
-	statement["_content"]["_type"] == "Structure" && 
-	statement["_content"]["typedeclaration"]["typeparameters"].length == 1
+	statement["_content"]["_type"] == "Structure"
 end.each do |statement|
 	generic_structures[statement["_content"]["typedeclaration"]["structname"]["_token"]] = statement["_content"]
 end
