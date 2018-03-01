@@ -34,15 +34,16 @@ grammar "TypeParameters" do
 	one ">"
 end
 
-grammar "Member" do
-	one TypeIdentifier
-	one MemberName
-end
-
 grammar "Attribute" do
 	one "["
 	one TypeExpression
 	one "]"
+end
+
+grammar "Member" do
+	maybemany Attribute
+	one TypeIdentifier
+	one MemberName
 end
 
 grammar "Structure" do

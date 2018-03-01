@@ -44,5 +44,8 @@ struct Music
 [BigEndian]
 struct AttributeTest
 {
-	Uint32 number
+	Uint32 bigEndianNumber
+
+	[LittleEndian]
+	Uint32 littleEndianNumber
 }

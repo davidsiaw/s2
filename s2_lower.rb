@@ -95,6 +95,16 @@ def construct_struct(typeident, output, generic_structures)
 
 		field["type"] = instantiate_type(member["typeidentifier"], output, generic_structures)
 
+		field["attributes"] = []
+
+		member["attributes"].each do |attr|
+			attribute = {}
+
+			attribute["id"] = instantiate_type(attr["typeexpression"]["_content"], output, generic_structures)
+
+			field["attributes"] << attribute
+		end
+		
 		thing["fields"] << field
 	end
 
