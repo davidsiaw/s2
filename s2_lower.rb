@@ -58,10 +58,6 @@ def construct_struct(typeident, output, generic_structures)
 
 	instance_name = typeident["structname"]["_token"]
 
-	# type already instantiated
-	if output["structures"].has_key?(instance_name)
-		return instance_name
-	end
 
 	structure = generic_structures[typeident["structname"]["_token"]]
 
@@ -77,6 +73,13 @@ def construct_struct(typeident, output, generic_structures)
 			type_variables[typevar["_token"]] = idx
 		end
 	end
+
+	# type already instantiated
+	if output["structures"].has_key?(instance_name)
+		return instance_name
+	end
+
+	output["structures"][instance_name] = {}
 
 	thing = {
 		"fields" => [],

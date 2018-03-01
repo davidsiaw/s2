@@ -33,7 +33,7 @@ struct Boxuse
 struct Collection<$T>
 {
 	$T head
-	Pair<$T,$T> pair
+	Collection<$T> tail
 }
 
 struct Music
