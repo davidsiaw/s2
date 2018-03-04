@@ -1,6 +1,7 @@
 token "TypeVariable", :custom, "'$' bigletter { bigletter | letter | digit }"
 token "StructName", :pascal_case, nil
 token "MemberName", :camel_case, nil
+token "NumberLiteral", :number
 
 grammar "TypeIdentifier" do
 	either StructName, TypeVariable
@@ -34,9 +35,31 @@ grammar "TypeParameters" do
 	one ">"
 end
 
+grammar "NumberLit" do
+	one NumberLiteral
+end
+
+variation "Expression", NumberLit
+
+grammar "AttributeParam" do
+	one MemberName
+	one "="
+	one Expression
+end
+
+grammar "AttributeParamList" do
+	one ":"
+	one AttributeParam
+	maybemany group {
+		one ","
+		one AttributeParam
+	}
+end
+
 grammar "Attribute" do
 	one "["
 	one TypeExpression
+	maybe AttributeParamList
 	one "]"
 end
 

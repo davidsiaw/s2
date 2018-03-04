@@ -34,7 +34,7 @@ int main(int argc, char** argv)
 	}
 	catch (S2::ParserException e)
 	{
-		std::wcout << JsonifyParserError(e).serialize() << std::endl;
+		std::wcerr << JsonifyParserError(e).serialize() << std::endl;
 
 		return EXIT_FAILURE;
 	}
@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 	{
 		std::wstringstream str;
 		str << "File not found: " << argv[1];
-		std::wcout << JsonifyOtherError(str.str()).serialize() << std::endl;
+		std::wcerr << JsonifyOtherError(str.str()).serialize() << std::endl;
 
 		return EXIT_FAILURE;
 	}

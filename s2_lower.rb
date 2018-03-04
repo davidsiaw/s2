@@ -26,7 +26,8 @@ def rewrite_type_expression(typeidentifier, type_arguments, type_variables, outp
 		typevar = typevar_obj["_token"]
 
 		if type_variables.has_key?(typevar)
-			typeidentifier["structname"]["_token"] = instantiate_type(type_arguments[type_variables[typevar]], output, generic_structures)
+			typeidentifier["structname"]["_token"] = instantiate_type(type_arguments[type_variables[typevar]], output, generic_structures)[:mangled]
+
 		else
 			STDERR.puts "Unknown type variable #{typevar} at line #{typevar_obj["_line"]}"
 		end
@@ -57,7 +58,7 @@ def construct_struct(typeident, output, generic_structures)
 	type_variables = {}
 
 	instance_name = typeident["structname"]["_token"]
-
+	syntactic_name = typeident["structname"]["_token"]
 
 	structure = generic_structures[typeident["structname"]["_token"]]
 
@@ -66,8 +67,15 @@ def construct_struct(typeident, output, generic_structures)
 			typeident["typeparameterarguments"][0]["typeexpressions"].map do |typeexpr|
 				type_arguments << typeexpr["_content"]				
 
-				instantiate_type(typeexpr["_content"], output, generic_structures)
+				instantiate_type(typeexpr["_content"], output, generic_structures)[:mangled]
 			end.join("And") 
+
+		syntactic_name_part = typeident["typeparameterarguments"][0]["typeexpressions"].map do |typeexpr|
+				
+				instantiate_type(typeexpr["_content"], output, generic_structures)[:syntactic]
+			end.join(",") 
+
+		syntactic_name += "<#{syntactic_name_part}>"
 
 		structure["typedeclaration"]["typeparameters"][0]["typevariables"].each_with_index do |typevar, idx|
 			type_variables[typevar["_token"]] = idx
@@ -76,12 +84,16 @@ def construct_struct(typeident, output, generic_structures)
 
 	# type already instantiated
 	if output["structures"].has_key?(instance_name)
-		return instance_name
+		return ({
+			mangled: instance_name,
+			syntactic: syntactic_name
+		})
 	end
 
 	output["structures"][instance_name] = {}
 
 	thing = {
+		"s2name" => syntactic_name,
 		"fields" => [],
 		"attributes" => []
 	}
@@ -93,32 +105,35 @@ def construct_struct(typeident, output, generic_structures)
 
 		field["name"] = member["membername"]["_token"]
 
-		field["type"] = instantiate_type(member["typeidentifier"], output, generic_structures)
+		field["type"] = instantiate_type(member["typeidentifier"], output, generic_structures)[:mangled]
 
 		field["attributes"] = []
 
 		member["attributes"].each do |attr|
 			attribute = {}
 
-			attribute["id"] = instantiate_type(attr["typeexpression"]["_content"], output, generic_structures)
+			attribute["id"] = instantiate_type(attr["typeexpression"]["_content"], output, generic_structures)[:mangled]
 
 			field["attributes"] << attribute
 		end
-		
+
 		thing["fields"] << field
 	end
 
 	structure["attributes"].each do |attr|
 		attribute = {}
 
-		attribute["id"] = instantiate_type(attr["typeexpression"]["_content"], output, generic_structures)
+		attribute["id"] = instantiate_type(attr["typeexpression"]["_content"], output, generic_structures)[:mangled]
 
 		thing["attributes"] << attribute
 	end
 
 	output["structures"][instance_name] = thing
 
-	instance_name
+	{
+		mangled: instance_name,
+		syntactic: syntactic_name
+	}
 end
 
 def instantiate_type(typeident, output, generic_structures)
@@ -127,7 +142,10 @@ def instantiate_type(typeident, output, generic_structures)
 		
 		construct_struct(typeident, output, generic_structures)
 	else
-		typeident["structname"]["_token"]
+		{
+			mangled: typeident["structname"]["_token"], 
+			syntactic: typeident["structname"]["_token"]
+		}
 	end
 end
 

@@ -49,3 +49,20 @@ struct AttributeTest
 	[LittleEndian]
 	Uint32 littleEndianNumber
 }
+
+[Attribute]
+struct GenericClassWithAttribute<$T>
+{
+	$T thing
+}
+
+struct GenAttributeTest
+{
+	GenericClassWithAttribute<Uint32> a
+}
+
+[Version: major=5, minor=6]
+struct AttributeWithExpression
+{
+	Uint32 filler
+}

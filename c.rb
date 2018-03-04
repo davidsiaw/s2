@@ -55,7 +55,9 @@ end
 
 def make_function_defines(structure_name, structure, is_source:)
 
-	function_defines = ""
+	function_defines = <<-HEAD
+/* #{structure["s2name"]} */	
+	HEAD
 
 
 	create_definition = <<-CREATE_DEFINITION

@@ -21,6 +21,18 @@ typedef struct _tag_#{structure_name} #{structure_name};
 
 end
 
+s2runtime = <<-RUNTIME
+
+#ifndef S2_RUNTIME
+#define S2_RUNTIME
+typedef enum
+{
+	#{error_types.join(",\n\t")}
+} S2Error;
+
+#endif /* S2_RUNTIME */
+
+RUNTIME
 
 puts <<-HEADER
 #ifndef #{header_define}
@@ -33,14 +45,7 @@ extern "C"
 {
 #endif
 
-#ifndef S2_RUNTIME
-#define S2_RUNTIME
-typedef enum
-{
-	#{error_types.join(",\n\t")}
-} S2Error;
-
-#endif /* S2_RUNTIME */
+#{s2runtime}
 
 #{structure_defines}
 
