@@ -34,7 +34,7 @@ int main(int argc, char** argv)
 	}
 	catch (S2::ParserException e)
 	{
-		std::wcerr << JsonifyParserError(e).serialize() << std::endl;
+		std::wcout << JsonifyParserError(e).serialize() << std::endl;
 
 		return EXIT_FAILURE;
 	}

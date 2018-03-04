@@ -2,6 +2,7 @@ token "TypeVariable", :custom, "'$' bigletter { bigletter | letter | digit }"
 token "StructName", :pascal_case, nil
 token "MemberName", :camel_case, nil
 token "NumberLiteral", :number
+token "StringLiteral", :string
 
 grammar "TypeIdentifier" do
 	either StructName, TypeVariable
@@ -78,6 +79,11 @@ grammar "Structure" do
 	one "}"
 end
 
-variation "Statement", Structure
+grammar "Import" do
+	one "import"
+	one StringLiteral
+end
+
+variation "Statement", Structure, Import
 
 maybemany Statement
