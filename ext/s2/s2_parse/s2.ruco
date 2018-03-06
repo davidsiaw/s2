@@ -68,6 +68,10 @@ grammar "Member" do
 	maybemany Attribute
 	one TypeIdentifier
 	one MemberName
+	maybemany group {
+		one ","
+		one MemberName
+	}
 end
 
 grammar "Structure" do

@@ -1,5 +1,6 @@
 require "yaml"
 require "json"
+require "s2/s2_parse"
 
 def rewrite_object_with_filename(object, file)
 	if object.is_a?(Hash) && object.has_key?("_col") && object.has_key?("_line")
@@ -21,7 +22,8 @@ concatenated_ast = {}
 
 def concatenate(file, concatenated_ast)
 
-	ast_str = `./s2_parse #{file}`
+	contents = File.read(file)
+	ast_str = S2_parse.compile_to_ast(contents)
 	ast = JSON.parse(ast_str)
 
 	File.write("#{file}.precon.yml", ast.to_yaml)

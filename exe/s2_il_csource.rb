@@ -1,6 +1,6 @@
 require "yaml"
 require "json"
-require "./c"
+require "s2/internal/c"
 
 struct = YAML.load_file ARGV[0]
 

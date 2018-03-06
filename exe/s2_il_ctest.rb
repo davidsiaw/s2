@@ -1,6 +1,6 @@
 require "yaml"
 require "json"
-require "./c"
+require "s2/internal/c"
 
 def fail_if(expr, i, test_name)
 	<<-CHECK

@@ -99,25 +99,33 @@ def construct_struct(typeident, output, generic_structures)
 	}
 
 	structure["members"].each do |member|
-		field = {}
 
-		member = rewrite_member(member, type_arguments, type_variables, output, generic_structures)
 
-		field["name"] = member["membername"]["_token"]
+		member["membernames"].each do |member_name_entry|
 
-		field["type"] = instantiate_type(member["typeidentifier"], output, generic_structures)[:mangled]
+			member_name = member_name_entry["_token"]
 
-		field["attributes"] = []
+			field = {}
 
-		member["attributes"].each do |attr|
-			attribute = {}
+			member = rewrite_member(member, type_arguments, type_variables, output, generic_structures)
 
-			attribute["id"] = instantiate_type(attr["typeexpression"]["_content"], output, generic_structures)[:mangled]
+			field["name"] = member_name
 
-			field["attributes"] << attribute
+			field["type"] = instantiate_type(member["typeidentifier"], output, generic_structures)[:mangled]
+
+			field["attributes"] = []
+
+			member["attributes"].each do |attr|
+				attribute = {}
+
+				attribute["id"] = instantiate_type(attr["typeexpression"]["_content"], output, generic_structures)[:mangled]
+
+				field["attributes"] << attribute
+			end
+
+			thing["fields"] << field
 		end
 
-		thing["fields"] << field
 	end
 
 	structure["attributes"].each do |attr|
