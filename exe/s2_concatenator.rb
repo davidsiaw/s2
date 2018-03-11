@@ -1,6 +1,7 @@
 require "yaml"
 require "json"
 require "s2/s2_parse"
+require "s2/display"
 
 def rewrite_object_with_filename(object, file)
 	if object.is_a?(Hash) && object.has_key?("_col") && object.has_key?("_line")
@@ -26,15 +27,14 @@ def concatenate(file, concatenated_ast)
 	ast_str = S2_parse.compile_to_ast(contents)
 	ast = JSON.parse(ast_str)
 
-	File.write("#{file}.precon.yml", ast.to_yaml)
-
 	file_fullname = File.expand_path(file)
 
 	if ast["_error"]
-		STDERR.puts "Error in #{file_fullname}"
-		STDERR.puts ast
+		S2::Display.error(file_fullname, contents, ast)
 		exit(1)
 	end
+
+	File.write("#{file}.precon.yml", ast.to_yaml)
 
  	if !concatenated_ast.has_key?(:_col)
  		concatenated_ast[:_files] = {}
@@ -54,6 +54,18 @@ def concatenate(file, concatenated_ast)
 	ast["statements"].each do |statement|
 		if statement["_content"]["_type"] == "Import"
 			child_file = statement["_content"]["stringliteral"]["_token"].sub(/\A"/, "").sub(/"\Z/, "")
+
+			if !File.exist?(child_file)
+				S2::Display.error(file_fullname, contents, {
+					"_col" => statement["_content"]["stringliteral"]["_col"],
+					"_line" => statement["_content"]["stringliteral"]["_line"],
+					"_error" => "File not found",
+					"_explain" => "Attempted to load #{File.expand_path(child_file)}",
+					"_type" => "import"
+				})
+				exit(1)
+			end
+
 			concatenate(child_file, concatenated_ast)
 		else
 			concatenated_ast[:statements] << rewrite_object_with_filename(statement, file_fullname)

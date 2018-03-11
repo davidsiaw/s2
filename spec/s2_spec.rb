@@ -22,7 +22,8 @@ RSpec.describe S2 do
   end
 
   it 'Can throw errors' do
-    output = JSON.parse(S2_parse.compile_to_ast("struct"))
+    source = "struct abcd"
+    output = JSON.parse(S2_parse.compile_to_ast(source))
     expect(output["_error"]).not_to be nil
   end
 end

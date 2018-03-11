@@ -9,6 +9,7 @@ picojson::value JsonifyParserError(S2::ParserException e)
 	error[L"_error"] = picojson::value(e.GetMessage());
 	error[L"_line"] = picojson::value((double)e.LineNumber());
 	error[L"_col"] = picojson::value((double)e.ColumnNumber());
+	error[L"_type"] = picojson::value(L"parser");
 	return picojson::value(error);
 }
 
@@ -16,6 +17,7 @@ picojson::value JsonifyOtherError(std::wstring message)
 {
 	picojson::object error;
 	error[L"_error"] = picojson::value(message);
+	error[L"_type"] = picojson::value(L"other");
 	return picojson::value(error);
 }
 
