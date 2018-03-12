@@ -23,7 +23,7 @@ concatenated_ast = {}
 
 def concatenate(file, concatenated_ast)
 
-	contents = File.read(file)
+	contents = File.read(file).gsub("\t", " " * 4)
 	ast_str = S2_parse.compile_to_ast(contents)
 	ast = JSON.parse(ast_str)
 
