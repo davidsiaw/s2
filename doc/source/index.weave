@@ -1,0 +1,71 @@
+require "yaml"
+require "redcarpet"
+
+markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true, tables: true, fenced_code_blocks: true)
+
+pages = Dir["pages/**/*.md"].map { |x|
+  { 
+    file: x, 
+    path: x.sub(/^pages\//, "").sub(/\.md$/, "").sub(/\/?main$/, ""),
+    info: YAML.load_file(x)
+  }
+}.sort_by{|x| x[:path]}
+
+pages.each do |x|
+
+  sidenav_page x[:path], "S2 Documentation" do
+
+    request_css "css/highlighter-js-styles/default.css"
+    request_js "js/highlight.pack.js"
+
+
+  	brand "S2 Documentation"
+    menu do
+
+      pages.each do |page|
+        nav "#{" - " * page[:path].count("/")}#{page[:info]["title"]}", (page[:info]["symbol"] || ">#{page[:info]["title"][0]}"), "/#{page[:path]}" if !page[:info]["hidden"]
+      end
+
+    end
+
+    row do
+      col 12 do
+        widget color: :"white" do
+          h1 x[:info]["title"], style: "margin-top:10px"
+        end
+
+        elem = Elements.new(@page, @anchors)
+        elem.instance_eval do
+          widget color: :"white" do
+            text "$$"
+          end
+        end
+
+        paragraph_elems = elem.generate.split("$$")
+
+        file_contents = File.read(x[:file])
+
+        file_contents = file_contents.gsub("\r", "")
+        file_contents = file_contents.split("---\n", 2)[1]
+
+        file_contents = markdown.render(file_contents)
+
+        file_contents = paragraph_elems[0] + file_contents
+
+
+        file_contents.gsub!("<hr>", paragraph_elems[1]+paragraph_elems[0])
+
+        file_contents.gsub!("<table>", '<table class="table table-hover">')
+
+        file_contents = file_contents + paragraph_elems[1]
+
+        text file_contents
+
+      end
+    end
+
+    write_script_once <<-SCRIPT
+      hljs.initHighlightingOnLoad();
+    SCRIPT
+  end
+end
