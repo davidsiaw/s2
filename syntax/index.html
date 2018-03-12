@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<!-- Generated using weaver: https://github.com/davidsiaw/weaver -->
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>S2 Documentation</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="../css/plugins/iCheck/custom.css" rel="stylesheet">
+
+    	<link href="../css/style.css" rel="stylesheet">
+
+
+    <link href="../css/animate.css" rel="stylesheet">
+    
+    <link href="../css/highlighter-js-styles/default.css" rel="stylesheet">
+
+    
+</head>
+
+<body>
+
+<div id="background" style="z-index: -999; position:absolute; left:0px; right:0px; width:100%; height:100%">
+
+</div>
+
+<div id="content" style="z-index: 0">
+
+	<div id="wrapper">
+
+		<nav class="navbar-default navbar-static-side" role="navigation">
+			<div class="sidebar-collapse">
+				<ul class="nav" id="side-menu">
+
+
+	                <li>
+	                    <a href="/"><i class="fa fa-home"></i> <span class="nav-label">S2 Documentation</span> <span class="label label-primary pull-right"></span></a>
+	                </li>
+
+<li ><a href="/"><i class="fa fa-file"></i><span class="nav-label">Home</span></a></li><li ><a href="/syntax"><i class="fa fa-file"></i><span class="nav-label">Syntax</span></a></li><li ><a href="/using"><i class="fa fa-file"></i><span class="nav-label">Using S2</span></a></li>
+
+				</ul>
+			</div>
+		</nav>
+		<div id="page-wrapper" class="gray-bg">
+			<div class="row border-bottom">
+		        <nav class="navbar navbar-static-top  " role="navigation" style="margin-bottom: 0">
+					<div class="navbar-header">
+					    <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#"><i class="fa fa-bars"></i> </a>
+					</div>
+		            <ul class="nav navbar-top-links navbar-right">
+		                <!-- NAV RIGHT -->
+		            </ul>
+		        </nav>
+	        </div>
+	<div class="row " style="">
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 ">
+			<div class="widget style1 white-bg"><h1 style="margin-top:10px">Syntax</h1></div><div class="widget style1 white-bg"><p>In its most basic form, S2 structures look like this:</p>
+
+<pre><code class="csharp">struct Name
+{
+    Uint32 aField
+    Uint32 anotherField
+}
+</code></pre>
+
+<p>They have a <code>Name</code> that must always start with an uppercase. This name is the datatype that is being defined. </p>
+
+<p>They have fields that are defined as a datatype followed by the field name. They can have any number of fields.</p>
+
+<p>Datatypes always start with an uppercase.</p>
+
+<p>Field names always start with a lowercase.</p>
+
+<p>There are more general rules to this but this is how they are for now.</p>
+
+</div><div class="widget style1 white-bg">
+
+<p>S2 structures can have attributes, for example:</p>
+
+<pre><code class="csharp">[LittleEndian]
+struct Name
+{
+    Uint32 aField
+    Uint32 anotherField
+}
+</code></pre>
+
+<p>The attribute is placed in square brackets above the struct keyword. Placing the attribute <code>[LittleEndian]</code> here means all the integers in this structure must be read out in little-endian order.</p>
+
+<p>Fields can also have attributes:</p>
+
+<pre><code class="csharp">struct Name
+{
+    [LittleEndian]
+    Uint32 aField
+
+    [BigEndian]
+    Uint32 anotherField
+}
+</code></pre>
+
+<p>This obviously means that <code>aField</code> is encoded in little endian and <code>anotherField</code> is encoded as a big endian. </p>
+
+<p><code>[LittleEndian]</code> and <code>[BigEndian]</code> are special attributes that tell the compiler how to read bytes from a stream. They do not impact the way they are stored in memory. By default, all numbers are <code>[LittleEndian]</code></p>
+
+</div><div class="widget style1 white-bg">
+
+<p>You can use a structure in another structure:</p>
+
+<pre><code class="csharp">struct Name
+{
+    Uint32 aField
+    Uint32 anotherField
+}
+
+struct Structure
+{
+    Name thing
+    Uint32 number
+}
+</code></pre>
+
+<p>In this case you have created a new structure called <code>Structure</code> and it contains a field of type <code>Name</code>.</p>
+
+</div><div class="widget style1 white-bg">
+
+<p>It is possible to refer to a structure inside itself:</p>
+
+<pre><code class="csharp">struct Name
+{
+    Name inside
+}
+</code></pre>
+
+<p>This is known as a recursive structure. This basically means that a Name exists inside another name.</p>
+
+<p>In a target language this means you can request inside an infinite number of times. We will see why this is useful later.</p>
+
+</div><div class="widget style1 white-bg">
+</div>
+		</div>
+
+	</div>
+
+		</div>
+	</div>
+
+</div>
+
+    <!-- Mainly scripts -->
+    <script src="../js/jquery-2.1.1.js"></script>
+    <script src="../js/jquery-ui-1.10.4.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    <script src="../js/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="../js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+    <script src="../js/MathJax/MathJax.js?config=AM_HTMLorMML-full" async></script>
+
+    <script src="../js/highlight.pack.js"></script>
+
+
+
+
+    <!-- Custom and plugin javascript -->
+    <script src="../js/inspinia.js"></script>
+    <script src="#{mod}js/plugins/pace/pace.min.js"></script>
+
+    <script>
+
+      hljs.initHighlightingOnLoad();
+
+
+
+$( document ).ready(function() {
+
+
+
+});
+    </script>
+
+    
+
+</body>
+
+</html>
+

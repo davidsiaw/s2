@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<!-- Generated using weaver: https://github.com/davidsiaw/weaver -->
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>S2 Documentation</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="css/plugins/iCheck/custom.css" rel="stylesheet">
+
+    	<link href="css/style.css" rel="stylesheet">
+
+
+    <link href="css/animate.css" rel="stylesheet">
+    
+    <link href="css/highlighter-js-styles/default.css" rel="stylesheet">
+
+    
+</head>
+
+<body>
+
+<div id="background" style="z-index: -999; position:absolute; left:0px; right:0px; width:100%; height:100%">
+
+</div>
+
+<div id="content" style="z-index: 0">
+
+	<div id="wrapper">
+
+		<nav class="navbar-default navbar-static-side" role="navigation">
+			<div class="sidebar-collapse">
+				<ul class="nav" id="side-menu">
+
+
+	                <li>
+	                    <a href="/"><i class="fa fa-home"></i> <span class="nav-label">S2 Documentation</span> <span class="label label-primary pull-right"></span></a>
+	                </li>
+
+<li ><a href="/"><i class="fa fa-file"></i><span class="nav-label">Home</span></a></li><li ><a href="/syntax"><i class="fa fa-file"></i><span class="nav-label">Syntax</span></a></li><li ><a href="/using"><i class="fa fa-file"></i><span class="nav-label">Using S2</span></a></li>
+
+				</ul>
+			</div>
+		</nav>
+		<div id="page-wrapper" class="gray-bg">
+			<div class="row border-bottom">
+		        <nav class="navbar navbar-static-top  " role="navigation" style="margin-bottom: 0">
+					<div class="navbar-header">
+					    <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#"><i class="fa fa-bars"></i> </a>
+					</div>
+		            <ul class="nav navbar-top-links navbar-right">
+		                <!-- NAV RIGHT -->
+		            </ul>
+		        </nav>
+	        </div>
+	<div class="row " style="">
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 ">
+			<div class="widget style1 white-bg"><h1 style="margin-top:10px">Home</h1></div><div class="widget style1 white-bg"><h1>S2</h1>
+
+<p>S2 is a language that describes binary data structures. It compiles to a variety of languages into code that allows a person to create, read, modify and write any given data structure to a binary file in those languages.</p>
+
+<p>The following is a simple example of an S2 file</p>
+
+<pre><code class="csharp">import &quot;base&quot;
+
+struct NumberList
+{
+    Uint32 magic = &#39;NUML&#39;
+    Uint32 numberCount
+    Uint32[numberCount] numbers
+}
+</code></pre>
+
+<p>This translates to an API that can be used to read and write the NumberList to a file, or even create a new one</p>
+
+</div><div class="widget style1 white-bg">
+
+<h3>In C:</h3>
+
+<pre><code class="c">/* read a file */
+NumberList* numList; 
+
+FILE* source = fopen(&quot;numberlist&quot;, &quot;rb&quot;);
+S2ERROR err = ReadNumberList(source, &amp;numList);
+if (err != S2_NO_ERROR) { printf(&quot;error!\n&quot;); return; }
+fclose(source);
+
+/* read its contents */
+ArrayOfUint32* arr;
+err = GetNumberList_numbers(numList, &amp;arr);
+if (err != S2_NO_ERROR) { printf(&quot;error!\n&quot;); return; }
+
+/* modify its contents */
+err = ArrayOfUint32_push(arr, 5);
+if (err != S2_NO_ERROR) { printf(&quot;error!\n&quot;); return; }
+
+/* write a file */
+FILE* dest = fopen(&quot;numberlist2&quot;, &quot;wb&quot;);
+err = WriteNumberList(dest, numList);
+if (err != S2_NO_ERROR) { printf(&quot;error!\n&quot;); return; }
+fclose(dest);
+
+/* free it */
+DeleteNumberList(numList);
+</code></pre>
+
+</div><div class="widget style1 white-bg">
+
+<h3>In C++:</h3>
+
+<pre><code class="cpp">// read a file
+std::ifstream source (&quot;numberlist&quot;, ios::binary);
+std::shared_ptr&lt;NumberList&gt; numList = std::make_shared&lt;NumberList&gt;(source);
+
+// modify its contents
+numList-&gt;numbers()-&gt;push_back(5);
+
+// write a file
+std::ofstring dest(&quot;numberlist2&quot;, ios::binary);
+numList-&gt;write(dest);
+</code></pre>
+
+</div><div class="widget style1 white-bg">
+
+<h3>In Ruby:</h3>
+
+<pre><code class="ruby"># read a file
+numList = NumberList::from_file(&quot;numberlist&quot;)
+
+# modify its contents
+numList.numbers &lt;&lt; 5
+
+# write a file
+numList.to_file(&quot;numberlist2&quot;)
+</code></pre>
+
+</div><div class="widget style1 white-bg">
+
+<h3>In JavaScript:</h3>
+
+<pre><code class="javascript">// read a file
+var numList = NumberList.from_file(&quot;numberList&quot;)
+
+// modify its contents
+numList.get_numbers().push(5)
+
+// write a file
+numList.to_file(&quot;numberlist2&quot;)
+</code></pre>
+
+</div><div class="widget style1 white-bg">
+
+<h1>Inspiration</h1>
+
+<p>S2 was inspired by the fact that you can create a struct in C and read it using fread:</p>
+
+<pre><code class="clike">#pragma pack(push,1)
+
+typedef struct {
+    uint32_t number1;
+    int32_t reserved;
+} SomeStruct;
+
+#pragma pack(pop)
+
+void read(FILE* fp)
+{
+    SomeStruct s;
+    fread(fp, &amp;s, sizeof(SomeStruct));
+    printf(&quot;%d\n&quot;, s.number1);
+}
+</code></pre>
+
+<p>However this is only usable if the structure was a fixed size. Members could not have varying sizes and arrays had to have a fixed size. This was not true of real-world binary file formats. So I set out to create a way to read files as if it was an <code>fread</code> while preserving the declarative nature of a struct declaration.</p>
+</div>
+		</div>
+
+	</div>
+
+		</div>
+	</div>
+
+</div>
+
+    <!-- Mainly scripts -->
+    <script src="js/jquery-2.1.1.js"></script>
+    <script src="js/jquery-ui-1.10.4.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+    <script src="js/MathJax/MathJax.js?config=AM_HTMLorMML-full" async></script>
+
+    <script src="js/highlight.pack.js"></script>
+
+
+
+
+    <!-- Custom and plugin javascript -->
+    <script src="js/inspinia.js"></script>
+    <script src="#{mod}js/plugins/pace/pace.min.js"></script>
+
+    <script>
+
+      hljs.initHighlightingOnLoad();
+
+
+
+$( document ).ready(function() {
+
+
+
+});
+    </script>
+
+    
+
+</body>
+
+</html>
+
