@@ -21,7 +21,7 @@ end
 
 concatenated_ast = {}
 
-def concatenate(file, concatenated_ast)
+def concatenate(file, concatenated_ast, arg)
 
 	contents = File.read(file).gsub("\t", " " * 4)
 	ast_str = S2_parse.compile_to_ast(contents)
@@ -30,11 +30,13 @@ def concatenate(file, concatenated_ast)
 	file_fullname = File.expand_path(file)
 
 	if ast["_error"]
-		S2::Display.error(file_fullname, contents, ast)
+		S2::Display.error(ast, 
+			filename: file_fullname,
+			extra: "Please refer to https://davidsiaw.github.com/s2/syntax for correct syntax")
 		exit(1)
 	end
 
-	File.write("#{file}.precon.yml", ast.to_yaml)
+	File.write("#{file}.precon.yml", ast.to_yaml) if arg == "dumpprecon"
 
  	if !concatenated_ast.has_key?(:_col)
  		concatenated_ast[:_files] = {}
@@ -56,13 +58,11 @@ def concatenate(file, concatenated_ast)
 			child_file = statement["_content"]["stringliteral"]["_token"].sub(/\A"/, "").sub(/"\Z/, "")
 
 			if !File.exist?(child_file)
-				S2::Display.error(file_fullname, contents, {
-					"_col" => statement["_content"]["stringliteral"]["_col"],
-					"_line" => statement["_content"]["stringliteral"]["_line"],
-					"_error" => "File not found",
-					"_explain" => "Attempted to load #{File.expand_path(child_file)}",
-					"_type" => "import"
-				})
+				S2::Display.error(statement["_content"]["stringliteral"],
+					filename: file_fullname,
+					error: "File not found",
+					explain: "Attempted to load #{File.expand_path(child_file)}")
+				
 				exit(1)
 			end
 
@@ -74,6 +74,6 @@ def concatenate(file, concatenated_ast)
 
 end
 
-concatenate(ARGV[0], concatenated_ast)
+concatenate(ARGV[0], concatenated_ast, ARGV[1])
 
 puts concatenated_ast.to_json

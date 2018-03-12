@@ -2,9 +2,9 @@ require "yaml"
 require "json"
 require "s2/internal/c"
 
-struct = YAML.load_file ARGV[0]
+struct = JSON.parse ARGF.first
 
-include_name = ARGV[0].sub(/\.yml$/, ".h")
+include_name = File.basename(struct["file"]).sub(/\.s2$/, ".h")
 
 structure_defines = ""
 function_defines = ""

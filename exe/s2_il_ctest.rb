@@ -29,9 +29,9 @@ void Test#{test_name}()
 	TEST
 end
 
-struct = YAML.load_file ARGV[0]
+struct = JSON.parse ARGF.first
 
-include_name = ARGV[0].sub(/\.yml$/, ".h")
+include_name = File.basename(struct["file"]).sub(/\.s2$/, ".h")
 
 test_info = {
 	test_declarations: "",

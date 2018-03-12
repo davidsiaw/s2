@@ -41,4 +41,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "ruco-cpp", "~> 0.4"
 
   spec.add_dependency "colorize"
+  spec.add_dependency "trollop"
 end

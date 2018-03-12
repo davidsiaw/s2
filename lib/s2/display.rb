@@ -3,17 +3,36 @@ require 'colorize'
 module S2
   module Display
 
-    def self.error(filename, source, err)
-      line = source.split("\n")
-      STDERR.puts "#{filename}:#{err["_line"]}:#{err["_col"]} #{"error".colorize(:red)}: #{err["_error"]}"
-      STDERR.puts line[err["_line"] - 1]
+    def self.error(info, filename:nil, error:nil, explain:nil, extra:nil)
 
-      STDERR.puts " " * (err["_col"] - 1) + "^".colorize(:green)
-      STDERR.puts " " * (err["_col"] - 1) + "#{err["_explain"]}" if err["_explain"]
+      if !error
+        error = info["_error"]
+      end
+      if !filename
+        filename = info["_file"]
+      end
+      if !explain
+        explain = info["_explain"]
+      end
+      if !extra
+        extra = info["_extra"]
+      end
+      
+      STDERR.puts "#{filename}:#{info["_line"]}:#{info["_col"]} #{"error".colorize(:red)}: #{error}"
 
-      if err["_type"] == "parser"
-      	STDERR.puts ""
-      	STDERR.puts "Please refer to https://davidsiaw.github.com/s2/syntax for correct syntax"
+      if filename
+        source = File.read(filename).gsub("\t", " " * 4)
+        line = source.split("\n")
+
+        STDERR.puts line[info["_line"] - 1]
+
+        STDERR.puts " " * (info["_col"] - 1) + "^".colorize(:green)
+        STDERR.puts " " * (info["_col"] - 1) + "#{explain}" if explain
+      end
+
+      if extra
+        STDERR.puts ""
+        STDERR.puts "#{extra}"
       end
     end
 

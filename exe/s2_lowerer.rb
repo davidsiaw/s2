@@ -1,15 +1,15 @@
 require "yaml"
 require "json"
+require "s2/display"
 
-ast = JSON.parse File.read(ARGV[0])
-
-File.write("#{ARGV[0]}.yml", ast.to_yaml)
+ast = JSON.parse ARGF.first
 
 generic_structures = {
 
 }
 
 output = {
+	"file" => ast["_file"],
 	"structures" => {}
 }
 
@@ -29,7 +29,12 @@ def rewrite_type_expression(typeidentifier, type_arguments, type_variables, outp
 			typeidentifier["structname"]["_token"] = instantiate_type(type_arguments[type_variables[typevar]], output, generic_structures)[:mangled]
 
 		else
-			STDERR.puts "Unknown type variable #{typevar} at line #{typevar_obj["_line"]}"
+
+			S2::Display.error(typevar_obj, 
+				error: "Unknown type variable #{typevar}", 
+				extra: "type variables in this context: #{type_variables.map{|k,v| k}.join(",")}")
+
+			exit(1)
 		end
 	end
 
@@ -178,4 +183,4 @@ end.each do |statement|
 end
 
 
-puts output.to_yaml
+puts output.to_json

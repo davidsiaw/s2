@@ -1,0 +1,68 @@
+#!/usr/bin/env ruby
+require 'trollop'
+require 'open3'
+
+TARGET_LANGUAGES = %w(c h cpp hpp ruby js ctest cpptest jstest rubytest)
+global_opts = Trollop::options do
+  version "s2c ver. #{S2::VERSION} (c) 2018 David Siaw"
+  banner <<-EOS
+Usage: s2c [options] <language> [flags] <filename.s2> 
+
+where <language> can be any of:
+#{TARGET_LANGUAGES.join(",")}
+
+and [flags] will depend on the language you choose. To see flags for that language please type
+  s2c c --help
+
+and [options] are:
+  EOS
+  stop_on TARGET_LANGUAGES
+end
+
+lang = ARGV.shift # get the subcommand
+backend = nil
+if lang == "c"
+	backend = "csource"
+	Trollop::options do
+	end
+elsif lang == "h"
+	backend = "cheader"
+	Trollop::options do
+	end
+else
+	backend = lang
+	Trollop::options do
+	end
+end
+
+source = ARGV.shift # get file
+
+parser_exe = File.join(Gem.loaded_specs['s2'].full_gem_path, "exe", "s2_concatenator.rb")
+lowerer_exe = File.join(Gem.loaded_specs['s2'].full_gem_path, "exe", "s2_lowerer.rb")
+backend_exe = File.join(Gem.loaded_specs['s2'].full_gem_path, "exe", "s2_il_#{backend}.rb")
+if !File.exists?(backend_exe)
+	Trollop::die "Language #{lang} is unrecognized"
+end
+
+if source == nil
+	Trollop::die "Please provide a file name."
+
+elsif !File.exists?(source)
+	Trollop::die "File '#{source}' not found"
+end
+
+ast = `bundle exec ruby #{parser_exe} #{source}`
+
+if ast.length == 0
+	exit(1)
+end
+
+il, s = Open3.capture2("bundle exec ruby #{lowerer_exe} -", stdin_data: ast)
+
+if il.length == 0
+	exit(1)
+end
+
+result, s = Open3.capture2("bundle exec ruby #{backend_exe} -", stdin_data: il)
+
+puts result

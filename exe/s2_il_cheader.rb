@@ -2,9 +2,9 @@ require "yaml"
 require "json"
 require "s2/internal/c"
 
-struct = YAML.load_file ARGV[0]
+struct = JSON.parse ARGF.first
 
-define_name = ARGV[0].sub(/\.yml$/, "").gsub(/[^0-9a-z]+/, "_").upcase
+define_name = File.basename(struct["file"]).sub(/\.s2$/, "").gsub(/[^0-9a-z]+/, "_").upcase
 header_define = "_#{define_name}_H_"
 
 structure_defines = ""
