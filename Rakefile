@@ -15,7 +15,7 @@ Rake::ExtensionTask.new do |ext|
 end
 
 task :regen_parser do
-  sh %{cd ext/s2/s2_parse && bundle exec ruco s2.ruco && rm *.old}
+  sh %{cd ext/s2/s2_parse && bundle exec ruco s2.ruco}
 end
 
 task :default => [:test]
