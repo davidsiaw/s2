@@ -21,3 +21,8 @@ ext/s2/s2_parse/parse_s2.cpp
 ext/s2/s2_parse/parse_s2.hpp
 ext/s2/s2_parse/picojson.hpp
 ext/s2/s2_parse/s2.atg
+
+doc/cache
+doc/build
+
+lib/s2/s2_parse
