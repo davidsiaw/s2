@@ -39,6 +39,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake-compiler", "~> 0.9.5"
   spec.add_development_dependency "rspec", "~> 3.0"
   spec.add_development_dependency "ruco-cpp", "~> 0.4"
+  spec.add_development_dependency "rspec_junit_formatter"
 
   spec.add_dependency "colorize"
   spec.add_dependency "trollop"
