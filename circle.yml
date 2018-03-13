@@ -63,6 +63,7 @@ jobs:
        - image: circleci/ruby:2.2.9-jessie-node
     working_directory: ~/repo
     steps:
+      - add_ssh_keys
       - checkout
       - run:
           name: Deploy Docs
