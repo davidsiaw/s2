@@ -22,7 +22,6 @@ and [options] are:
   stop_on TARGET_LANGUAGES
 end
 
-source = ARGV.shift # get file
 lang = ARGV.shift # get the subcommand
 
 backend = nil
@@ -39,6 +38,10 @@ else
 	Trollop::options do
 	end
 end
+
+STDERR.puts "s2c v#{S2::VERSION}; selected backend: #{backend}"
+
+source = ARGV.shift # get file
 
 parser_exe = File.join(Gem.loaded_specs['s2'].full_gem_path, "exe", "s2_concatenator.rb")
 lowerer_exe = File.join(Gem.loaded_specs['s2'].full_gem_path, "exe", "s2_lowerer.rb")
@@ -57,7 +60,6 @@ elsif !File.exists?(source)
 	Trollop::die "File '#{source}' not found"
 end
 
-STDERR.puts "s2c v#{S2::VERSION}; selected backend: #{backend}"
 
 ast = `bundle exec ruby #{parser_exe} #{source}`
 

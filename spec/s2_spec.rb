@@ -29,6 +29,18 @@ RSpec.describe S2 do
 
 end
 
+def run_command_that_shouldnt_fail(command, &block)
+  Open3.popen3(command) do |stdin, stdout, stderr, wait_thr|
+    if wait_thr.value.exitstatus != 0
+      puts "---"
+      puts stderr.read
+      puts "---"
+    end
+    expect(wait_thr.value.exitstatus).to eq(0)
+    yield stdin, stdout, stderr, wait_thr if block
+  end
+end
+
 RSpec.describe "s2c" do
 
   it 'Can be executed' do
@@ -38,32 +50,63 @@ RSpec.describe "s2c" do
   test_result_spec = /\/(?<resspec>ok|err)_[a-z0-9_]+\.s2$/
 
   Dir["spec/examples/*/**.s2"].each do |filename|
+
+    artifact_dir = ".test_artifacts"
+    FileUtils.mkdir_p(artifact_dir)
+
     testname = filename.sub(/^spec\/examples\//, "")
     m = test_result_spec.match(testname)
     if m[:resspec] == "ok"
-      testname += " should pass"
+      stage1testname = testname + " should transpile"
+      stage2testname = testname + " should compile"
 
-      it testname do
-        stdin, stdout, stderr, wait_thr = Open3.popen3("exe/s2c #{filename} h")
-        if wait_thr.value.exitstatus != 0
-          puts "---"
-          puts stderr.read
-          puts "---"
-        end
-        expect(wait_thr.value.exitstatus).to eq(0)
-        stdin.close
-        stdout.close
-        stderr.close
+      basename = File.basename(filename, File.extname(filename))
+      header_file = "#{artifact_dir}/#{basename}.h"
+      source_file = "#{artifact_dir}/#{basename}.c"
+      main_file = "#{artifact_dir}/#{basename}_main.c"
+      executable_file = "#{artifact_dir}/#{basename}"
+
+      it stage1testname do
+        run_command_that_shouldnt_fail("exe/s2c h #{filename}")
       end
+
+      it stage2testname do
+
+        run_command_that_shouldnt_fail("exe/s2c h #{filename}") do |stdin, stdout, stderr, wait_thr|
+          File.write(header_file, stdout.read)
+        end
+
+        run_command_that_shouldnt_fail("exe/s2c c #{filename}") do |stdin, stdout, stderr, wait_thr|
+          File.write(source_file, stdout.read)
+        end
+
+        run_command_that_shouldnt_fail("exe/s2c ctest #{filename}") do |stdin, stdout, stderr, wait_thr|
+          File.write(main_file, stdout.read)
+        end
+
+        cc = ENV["CC"] || "gcc"
+
+        run_command_that_shouldnt_fail("#{cc} -ansi -pedantic-errors -Wall -g -Werror #{main_file} #{source_file} -o #{executable_file}") do
+          |stdin, stdout, stderr, _|
+          File.write("#{executable_file}.compile.out", stdout.read)
+          File.write("#{executable_file}.compile.err", stderr.read)
+        end
+
+        run_command_that_shouldnt_fail(executable_file) do
+          |stdin, stdout, stderr, _|
+          File.write("#{executable_file}.run.out", stdout.read)
+          File.write("#{executable_file}.run.err", stderr.read)
+        end
+
+      end
+
     else
-      testname += " should fail"
+      testname += " should fail transpilation"
 
       it testname do
-        stdin, stdout, stderr, wait_thr = Open3.popen3("exe/s2c #{filename} h")
-        expect(wait_thr.value.exitstatus).not_to eq 0
-        stdin.close
-        stdout.close
-        stderr.close
+        Open3.popen3("exe/s2c h #{filename}") do |stdin, stdout, stderr, wait_thr|
+          expect(wait_thr.value.exitstatus).not_to eq 0
+        end
       end
     end
 
