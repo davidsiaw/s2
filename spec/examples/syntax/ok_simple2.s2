@@ -1,0 +1,4 @@
+struct Simple
+{
+	Uint32 number
+}

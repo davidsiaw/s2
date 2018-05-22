@@ -2,6 +2,7 @@ require "bundler/setup"
 require "s2"
 require "s2/s2_parse"
 require "json"
+require 'open3'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

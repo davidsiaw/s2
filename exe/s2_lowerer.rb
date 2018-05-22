@@ -4,6 +4,19 @@ require "s2/display"
 
 ast = JSON.parse ARGF.first
 
+INTRINSIC_STRUCTURES = {
+	"Uint8" => {},
+	"Uint16" => {},
+	"Uint32" => {},
+	"Uint64" => {},
+	"Int8" => {},
+	"Int16" => {},
+	"Int32" => {},
+	"Int64" => {},
+	"Float32" => {},
+	"Float64" => {}
+}
+
 generic_structures = {
 
 }
@@ -67,7 +80,23 @@ def construct_struct(typeident, output, generic_structures)
 
 	structure = generic_structures[typeident["structname"]["_token"]]
 
-	if typeident["typeparameterarguments"]
+	if !structure
+
+		if INTRINSIC_STRUCTURES.has_key?(instance_name)
+			return {
+				mangled: instance_name,
+				syntactic: syntactic_name
+			}
+		else
+			S2::Display.error(typeident, 
+				error: "Unknown type '#{instance_name}'", 
+				extra: "Please check that the type has been defined elsewhere in the file")
+			exit(1)
+		end
+	end
+
+	if typeident["typeparameterarguments"] && typeident["typeparameterarguments"].length == 1
+
 		instance_name += "Of" + 
 			typeident["typeparameterarguments"][0]["typeexpressions"].map do |typeexpr|
 				type_arguments << typeexpr["_content"]				
@@ -143,23 +172,11 @@ def construct_struct(typeident, output, generic_structures)
 
 	output["structures"][instance_name] = thing
 
-	{
-		mangled: instance_name,
-		syntactic: syntactic_name
-	}
 end
 
 def instantiate_type(typeident, output, generic_structures)
 
-	if typeident["typeparameterarguments"].length == 1
-		
-		construct_struct(typeident, output, generic_structures)
-	else
-		{
-			mangled: typeident["structname"]["_token"], 
-			syntactic: typeident["structname"]["_token"]
-		}
-	end
+	construct_struct(typeident, output, generic_structures)
 end
 
 def process_structure(structure, output, generic_structures)

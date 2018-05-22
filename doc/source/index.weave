@@ -23,6 +23,11 @@ pages.each do |x|
     menu do
 
       pages.each do |page|
+
+        if page[:path].count("/") > 0
+          next if !page[:path].start_with?(x[:path]) && page[:path].count("/") != x[:path].count("/")
+          next if x[:path] == ""
+        end
         nav "#{" - " * page[:path].count("/")}#{page[:info]["title"]}", (page[:info]["symbol"] || ">#{page[:info]["title"][0]}"), "/#{page[:path]}" if !page[:info]["hidden"]
       end
 

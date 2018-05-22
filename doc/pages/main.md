@@ -1,5 +1,5 @@
 title: Home
-symbol: :file
+symbol: :home
 ---
 
 # S2
@@ -126,3 +126,21 @@ void read(FILE* fp)
 ```
 
 However this is only usable if the structure was a fixed size. Members could not have varying sizes and arrays had to have a fixed size. This was not true of real-world binary file formats. So I set out to create a way to read files as if it was an `fread` while preserving the declarative nature of a struct declaration.
+
+---
+
+# Addendum
+
+### Naming universality
+
+You may notice that there are some very specific syntax that is imposed on you in S2. This is because this language needs to compile to other languages and be usable there, so the names and tokens that need to be recognizable in the target languages need to also be compatible with the target languages and be easily readable in them.
+
+### No null
+
+* NULL here refers to `NULL`/`null`/`nil`/`undefined` or whatever a meaningless or uninitialized value is represented as in a target language.
+
+S2 has no support for NULL. While useful in many cases, NULL in the context of different languages often have different meanings in different contexts and introduce many difficulties in implementing a sane and correct API in different target languages.
+
+Instead of NULL, S2 has a policy of using default values. The most basic default values are 0 for the numeric types. Uninitialized structures will simply default to these values internally.
+
+Please see the various languages' APIs to find out details on how uninitialized fields are handled in S2.

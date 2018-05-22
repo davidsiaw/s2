@@ -90,3 +90,44 @@ This is known as a recursive structure. This basically means that a Name exists 
 In a target language this means you can request inside an infinite number of times. We will see why this is useful later.
 
 ---
+
+It is possible to create an array using the `T[]` syntax.
+
+```
+struct LotteryNumbers
+{
+    Uint32[] numbers
+}
+```
+
+It is possible to create an array using the special generic `Array<T>` type also.
+
+```
+struct LotteryNumbers
+{
+    Array<Uint32> numbers
+}
+```
+
+By default, S2 will assume that arrays run all the way to the end of a stream, so if you read a file using this structure, it will read 4 bytes at a time until it reaches the end of a file.
+
+Due to the above, the following will produce an error:
+
+```
+struct LotteryNumbers
+{
+    Uint32[] numbers
+    Uint8 ageInYears
+}
+```
+
+The reason this is the case is because numbers already extends to the end of the file, so nothing can come after it. There must be a way to know how many numbers there are. One way to do so is to have a count come before the array.
+
+```
+struct LotteryNumbers
+{
+    Uint32 count
+    Uint32[&count] numbers
+    Uint8 ageInYears
+}
+```
