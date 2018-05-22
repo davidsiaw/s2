@@ -39,7 +39,7 @@ def rewrite_type_expression(typeidentifier, type_arguments, type_variables, outp
 		typevar = typevar_obj["_token"]
 
 		if type_variables.has_key?(typevar)
-			typeidentifier["structname"]["_token"] = instantiate_type(type_arguments[type_variables[typevar]], output, generic_structures)[:mangled]
+			typeidentifier["structname"]["_token"] = construct_struct(type_arguments[type_variables[typevar]], output, generic_structures)[:mangled]
 
 		else
 
@@ -111,12 +111,12 @@ def construct_struct(typeident, output, generic_structures)
 			typeident["typeparameterarguments"][0]["typeexpressions"].map do |typeexpr|
 				type_arguments << typeexpr["_content"]				
 
-				instantiate_type(typeexpr["_content"], output, generic_structures)[:mangled]
+				construct_struct(typeexpr["_content"], output, generic_structures)[:mangled]
 			end.join("And") 
 
 		syntactic_name_part = typeident["typeparameterarguments"][0]["typeexpressions"].map do |typeexpr|
 				
-				instantiate_type(typeexpr["_content"], output, generic_structures)[:syntactic]
+				construct_struct(typeexpr["_content"], output, generic_structures)[:syntactic]
 			end.join(",") 
 
 		syntactic_name += "<#{syntactic_name_part}>"
@@ -155,14 +155,14 @@ def construct_struct(typeident, output, generic_structures)
 
 			field["name"] = member_name
 
-			field["type"] = instantiate_type(member["typeidentifier"], output, generic_structures)[:mangled]
+			field["type"] = construct_struct(member["typeidentifier"], output, generic_structures)[:mangled]
 
 			field["attributes"] = []
 
 			member["attributes"].each do |attr|
 				attribute = {}
 
-				attribute["id"] = instantiate_type(attr["typeexpression"]["_content"], output, generic_structures)[:mangled]
+				attribute["id"] = construct_struct(attr["typeexpression"]["_content"], output, generic_structures)[:mangled]
 
 				field["attributes"] << attribute
 			end
@@ -175,18 +175,13 @@ def construct_struct(typeident, output, generic_structures)
 	structure["attributes"].each do |attr|
 		attribute = {}
 
-		attribute["id"] = instantiate_type(attr["typeexpression"]["_content"], output, generic_structures)[:mangled]
+		attribute["id"] = construct_struct(attr["typeexpression"]["_content"], output, generic_structures)[:mangled]
 
 		thing["attributes"] << attribute
 	end
 
 	output["structures"][instance_name] = thing
 
-end
-
-def instantiate_type(typeident, output, generic_structures)
-
-	construct_struct(typeident, output, generic_structures)
 end
 
 def process_structure(structure, output, generic_structures)
