@@ -78,7 +78,7 @@ def construct_struct(typeident, output, generic_structures)
 	instance_name = typeident["structname"]["_token"]
 	syntactic_name = typeident["structname"]["_token"]
 
-	structure = generic_structures[typeident["structname"]["_token"]]
+	structure = generic_structures[instance_name]
 
 	if !structure
 
@@ -87,10 +87,20 @@ def construct_struct(typeident, output, generic_structures)
 				mangled: instance_name,
 				syntactic: syntactic_name
 			}
-		else
+		else			
+
+			extra = "Please check that the type has been defined elsewhere in the file"
+
+			(INTRINSIC_STRUCTURES.keys + generic_structures.keys).each do |key|
+				if key.downcase == instance_name.downcase
+					extra = "Did you mean '#{key}'?"
+					break
+				end
+			end
+
 			S2::Display.error(typeident, 
 				error: "Unknown type '#{instance_name}'", 
-				extra: "Please check that the type has been defined elsewhere in the file")
+				extra: extra)
 			exit(1)
 		end
 	end

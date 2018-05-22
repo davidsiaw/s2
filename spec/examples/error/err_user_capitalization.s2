@@ -1,0 +1,9 @@
+struct CamelCaser
+{
+	Uint32 number
+}
+
+struct Simple
+{
+	Camelcaser thing
+}
