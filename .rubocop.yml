@@ -1,0 +1,17 @@
+inherit_from: .rubocop_todo.yml
+
+AllCops:
+  TargetRubyVersion: 2.6
+  Include:
+    - 'ext/s2/internal/s2.ruco'
+  Exclude:
+    - 'tmp/**/*'
+
+# Exclude extconf because globals are for compiler flags
+Style/GlobalVars:
+  Exclude:
+    - 'ext/s2/internal/extconf.rb'
+
+Lint/AmbiguousBlockAssociation:
+  Exclude:
+    - 'ext/s2/internal/s2.ruco'

@@ -1,0 +1,114 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 's2/s2_parse'
+require 's2/error_displayer'
+require 'json'
+require 'pathname'
+
+# Information about an import
+class Import
+  def initialize(dir, path)
+    @dir = dir
+    @path = path
+  end
+
+  def absolute_path
+    pathname = Pathname.new(@path)
+    return pathname.to_s if pathname.absolute? && File.exist?(pathname.realpath)
+
+    pathname = Pathname.new("#{@dir}/#{@path}")
+    return pathname.to_s if pathname.absolute? && File.exist?(pathname.realpath)
+
+    nil
+  end
+
+  def inspect
+    "#<#{self.class}:#{absolute_path}>"
+  end
+end
+
+# Represents a file and its AST
+class FileAST
+  attr_reader :dir, :name, :contents, :raw_contents
+
+  def initialize(absolute_path)
+    @dir = File.dirname(absolute_path)
+    @name = absolute_path
+    @raw_contents = File.read(absolute_path)
+    @contents = JSON.parse(S2::S2Parse.compile_to_ast(@raw_contents))
+    @contents['_file'] = absolute_path
+  end
+
+  def valid?
+    !@contents['_error']
+  end
+
+  def imports
+    return [] unless valid?
+
+    @contents['statements']
+      .map { |x| x['_content'] }
+      .select { |x| x['_type'] == 'Import' }
+      .map { |x| Import.new(dir, x['stringliteral']['_token'][1..-2]) }
+  end
+
+  def inspect
+    "#<#{self.class}:#{@name}>"
+  end
+end
+
+# Class to grab all imported files
+class S2AST
+  attr_reader :error_file
+
+  def initialize(file_list)
+    @imported_by_map = {}
+    @unread_files = file_list.map { |x| File.expand_path x }
+    read_files
+  end
+
+  def read_files
+    return @read_files if @read_files
+
+    @read_files = {}
+    ransack_files!
+    @read_files
+  end
+
+  def files
+    read_files.keys
+  end
+
+  def errored?
+    !@error_file.nil?
+  end
+
+  def error
+    error_file&.contents
+  end
+
+  def ransack_files!
+    loop do
+      name = @unread_files.shift
+
+      ast = FileAST.new(name)
+      @read_files[name] = ast
+      @error_file = ast unless ast.valid?
+      importables = ast.imports.map(&:absolute_path)
+                       .reject { |x| @read_files.key?(x) }
+      add_files!(name, importables)
+      break if @unread_files.empty? || errored?
+    end
+  end
+
+  def add_files!(name, importables)
+    @unread_files += importables
+    importables.each { |x| @imported_by_map[x] = name }
+  end
+end
+
+ast = S2AST.new(ARGV)
+
+err = S2::ErrorDisplayer.new(ast.error)
+puts err.output

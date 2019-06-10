@@ -1,6 +1,6 @@
 // Multiple members
 
-struct Simple
+format Simple
 {
 	Uint32 number
 	Uint32 anotherNumber

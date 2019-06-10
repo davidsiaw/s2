@@ -1,0 +1,321 @@
+
+#include <iostream>
+#include <memory>
+#include "S2.hpp"
+
+/*
+	WARNING: This file is generated using ruco. Please modify the .ruco file if you wish to change anything
+	https://github.com/davidsiaw/ruco
+*/
+
+COMPILER S2
+
+S2Ptr s2;
+
+CHARACTERS
+	bigletter    = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".
+	letter       = "abcdefghijklmnopqrstuvwxyz".
+	underscore   = "_".
+	digit        = "0123456789".
+	cr           = '\r'.
+	lf           = '\n'.
+	tab          = '\t'.
+	stringCh     = ANY - '"' - '\\' - cr - lf.
+	charCh       = ANY - '\'' - '\\' - cr - lf.
+	printable    =  '\u0020' .. '\u007e'.
+	hex          = "0123456789abcdef".
+
+TOKENS
+	pascalcase   = bigletter { bigletter | letter | digit }.
+	camelcase    = letter { bigletter | letter | digit }.
+
+	number       = digit { digit } [ '.' digit { digit } ].
+	hexinteger   = '0' 'x' hex { hex }.
+
+	string       = '"' { stringCh | '\\' printable } '"'.
+	badString    = '"' { stringCh | '\\' printable } (cr | lf).
+	char         = '\'' ( charCh | '\\' printable { hex } ) '\''.
+	endOfLine    = cr | lf.
+
+	customTokenTypeVariable = '$' bigletter { bigletter | letter | digit }.
+
+PRAGMAS
+	ddtSym    = '$' { digit | letter }. 
+	optionSym = '$' letter { letter } '='
+	            { digit | letter
+	            | '-' | '.' | ':'
+	            }.
+
+
+COMMENTS FROM "/*" TO "*/" NESTED
+COMMENTS FROM "//" TO lf
+
+IGNORE tab + cr + lf
+
+/*-------------------------------------------------------------------------*/
+
+PRODUCTIONS
+
+S2 = (. s2 = std::make_shared<class S2>(); .)
+(. unsigned curline = la->line, curcol = la->col; .)
+(. StatementPtr statement; .)
+(
+	{
+		Statement<statement> (. s2->statements.push_back(statement); .)
+	}
+)
+(. s2->_line = curline; s2->_col = curcol; .)
+.
+
+TypeVariable<TypeVariablePtr& production> = (. production = std::make_shared<class TypeVariable>(); .)
+(. unsigned curline = la->line, curcol = la->col; .)
+
+(
+	customTokenTypeVariable (. production->content = t->val; .)
+)
+(. production->_line = curline; production->_col = curcol; .)
+.
+
+StructName<StructNamePtr& production> = (. production = std::make_shared<class StructName>(); .)
+(. unsigned curline = la->line, curcol = la->col; .)
+
+(
+	pascalcase (. production->content = t->val; .)
+)
+(. production->_line = curline; production->_col = curcol; .)
+.
+
+MemberName<MemberNamePtr& production> = (. production = std::make_shared<class MemberName>(); .)
+(. unsigned curline = la->line, curcol = la->col; .)
+
+(
+	camelcase (. production->content = t->val; .)
+)
+(. production->_line = curline; production->_col = curcol; .)
+.
+
+NumberLiteral<NumberLiteralPtr& production> = (. production = std::make_shared<class NumberLiteral>(); .)
+(. unsigned curline = la->line, curcol = la->col; .)
+
+(
+	number (. production->content = t->val; .)
+)
+(. production->_line = curline; production->_col = curcol; .)
+.
+
+StringLiteral<StringLiteralPtr& production> = (. production = std::make_shared<class StringLiteral>(); .)
+(. unsigned curline = la->line, curcol = la->col; .)
+
+(
+	string (. production->content = t->val; .)
+)
+(. production->_line = curline; production->_col = curcol; .)
+.
+
+TypeIdentifier<TypeIdentifierPtr& production> = (. production = std::make_shared<class TypeIdentifier>(); .)
+(. unsigned curline = la->line, curcol = la->col; .)
+(. StructNamePtr structname; .)
+(. TypeVariablePtr typevariable; .)
+(. TypeParameterArgumentsPtr typeparameterarguments; .)
+(
+	(
+		StructName<structname> (. production->structname = structname; .)|
+		TypeVariable<typevariable> (. production->typevariable = typevariable; .)
+	)
+	[
+		TypeParameterArguments<typeparameterarguments> (. production->typeparameterarguments.push_back(typeparameterarguments); .)
+	]
+)
+(. production->_line = curline; production->_col = curcol; .)
+.
+
+TypeExpression<TypeExpressionPtr& production> = 
+(. unsigned curline = la->line, curcol = la->col; .)
+(. TypeIdentifierPtr typeidentifier; .)
+(
+	(
+		TypeIdentifier<typeidentifier> (. production = typeidentifier; .)
+	)
+)
+(. production->_line = curline; production->_col = curcol; .)
+.
+
+TypeParameterArguments<TypeParameterArgumentsPtr& production> = (. production = std::make_shared<class TypeParameterArguments>(); .)
+(. unsigned curline = la->line, curcol = la->col; .)
+(. TypeExpressionPtr typeexpression; .)
+(
+	"<"
+	TypeExpression<typeexpression> (. production->typeexpressions.push_back(typeexpression); .)
+	{
+		(
+			","
+			TypeExpression<typeexpression> (. production->typeexpressions.push_back(typeexpression); .)
+		)
+	}
+	">"
+)
+(. production->_line = curline; production->_col = curcol; .)
+.
+
+TypeDeclaration<TypeDeclarationPtr& production> = (. production = std::make_shared<class TypeDeclaration>(); .)
+(. unsigned curline = la->line, curcol = la->col; .)
+(. StructNamePtr structname; .)
+(. TypeParametersPtr typeparameters; .)
+(
+	StructName<structname> (. production->structname = structname; .)
+	[
+		TypeParameters<typeparameters> (. production->typeparameters.push_back(typeparameters); .)
+	]
+)
+(. production->_line = curline; production->_col = curcol; .)
+.
+
+TypeParameters<TypeParametersPtr& production> = (. production = std::make_shared<class TypeParameters>(); .)
+(. unsigned curline = la->line, curcol = la->col; .)
+(. TypeVariablePtr typevariable; .)
+(
+	"<"
+	TypeVariable<typevariable> (. production->typevariables.push_back(typevariable); .)
+	{
+		(
+			","
+			TypeVariable<typevariable> (. production->typevariables.push_back(typevariable); .)
+		)
+	}
+	">"
+)
+(. production->_line = curline; production->_col = curcol; .)
+.
+
+NumberLit<NumberLitPtr& production> = (. production = std::make_shared<class NumberLit>(); .)
+(. unsigned curline = la->line, curcol = la->col; .)
+(. NumberLiteralPtr numberliteral; .)
+(
+	NumberLiteral<numberliteral> (. production->numberliteral = numberliteral; .)
+)
+(. production->_line = curline; production->_col = curcol; .)
+.
+
+Expression<ExpressionPtr& production> = 
+(. unsigned curline = la->line, curcol = la->col; .)
+(. NumberLitPtr numberlit; .)
+(
+	(
+		NumberLit<numberlit> (. production = numberlit; .)
+	)
+)
+(. production->_line = curline; production->_col = curcol; .)
+.
+
+AttributeParam<AttributeParamPtr& production> = (. production = std::make_shared<class AttributeParam>(); .)
+(. unsigned curline = la->line, curcol = la->col; .)
+(. MemberNamePtr membername; .)
+(. ExpressionPtr expression; .)
+(
+	MemberName<membername> (. production->membername = membername; .)
+	"="
+	Expression<expression> (. production->expression = expression; .)
+)
+(. production->_line = curline; production->_col = curcol; .)
+.
+
+AttributeParamList<AttributeParamListPtr& production> = (. production = std::make_shared<class AttributeParamList>(); .)
+(. unsigned curline = la->line, curcol = la->col; .)
+(. AttributeParamPtr attributeparam; .)
+(
+	":"
+	AttributeParam<attributeparam> (. production->attributeparams.push_back(attributeparam); .)
+	{
+		(
+			","
+			AttributeParam<attributeparam> (. production->attributeparams.push_back(attributeparam); .)
+		)
+	}
+)
+(. production->_line = curline; production->_col = curcol; .)
+.
+
+Attribute<AttributePtr& production> = (. production = std::make_shared<class Attribute>(); .)
+(. unsigned curline = la->line, curcol = la->col; .)
+(. TypeExpressionPtr typeexpression; .)
+(. AttributeParamListPtr attributeparamlist; .)
+(
+	"["
+	TypeExpression<typeexpression> (. production->typeexpression = typeexpression; .)
+	[
+		AttributeParamList<attributeparamlist> (. production->attributeparamlists.push_back(attributeparamlist); .)
+	]
+	"]"
+)
+(. production->_line = curline; production->_col = curcol; .)
+.
+
+Member<MemberPtr& production> = (. production = std::make_shared<class Member>(); .)
+(. unsigned curline = la->line, curcol = la->col; .)
+(. AttributePtr attribute; .)
+(. TypeIdentifierPtr typeidentifier; .)
+(. MemberNamePtr membername; .)
+(
+	{
+		Attribute<attribute> (. production->attributes.push_back(attribute); .)
+	}
+	TypeIdentifier<typeidentifier> (. production->typeidentifier = typeidentifier; .)
+	MemberName<membername> (. production->membernames.push_back(membername); .)
+	{
+		(
+			","
+			MemberName<membername> (. production->membernames.push_back(membername); .)
+		)
+	}
+)
+(. production->_line = curline; production->_col = curcol; .)
+.
+
+Format<FormatPtr& production> = (. production = std::make_shared<class Format>(); .)
+(. unsigned curline = la->line, curcol = la->col; .)
+(. AttributePtr attribute; .)
+(. TypeDeclarationPtr typedeclaration; .)
+(. MemberPtr member; .)
+(
+	{
+		Attribute<attribute> (. production->attributes.push_back(attribute); .)
+	}
+	"format"
+	TypeDeclaration<typedeclaration> (. production->typedeclaration = typedeclaration; .)
+	"{"
+	Member<member> (. production->members.push_back(member); .)
+	{
+		Member<member> (. production->members.push_back(member); .)
+	}
+	"}"
+)
+(. production->_line = curline; production->_col = curcol; .)
+.
+
+Import<ImportPtr& production> = (. production = std::make_shared<class Import>(); .)
+(. unsigned curline = la->line, curcol = la->col; .)
+(. StringLiteralPtr stringliteral; .)
+(
+	"import"
+	StringLiteral<stringliteral> (. production->stringliteral = stringliteral; .)
+)
+(. production->_line = curline; production->_col = curcol; .)
+.
+
+Statement<StatementPtr& production> = 
+(. unsigned curline = la->line, curcol = la->col; .)
+(. FormatPtr format; .)
+(. ImportPtr import; .)
+(
+	(
+		Format<format> (. production = format; .)|
+		Import<import> (. production = import; .)
+	)
+)
+(. production->_line = curline; production->_col = curcol; .)
+.
+
+
+
+END S2.
+

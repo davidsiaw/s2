@@ -62,9 +62,10 @@ VALUE method_compile_to_ast(VALUE rubySelf, VALUE rubyString)
 	return rb_str_new_wide(L"{}");
 }
 
-extern "C" void Init_s2_parse()
+extern "C" void Init_internal()
 {
-	VALUE s2_parse = rb_define_module("S2_parse");
-	rb_define_method(s2_parse, "s2_parse_test", (VALUE(*)(ANYARGS))method_test,1);
-	rb_define_method(s2_parse, "s2_parse_compile_to_ast", (VALUE(*)(ANYARGS))method_compile_to_ast,1);
+	VALUE s2 = rb_define_module("S2");
+	VALUE s2_parse = rb_define_module_under(s2, "S2Parse");
+	rb_define_singleton_method(s2_parse, "s2_parse_test", (VALUE(*)(ANYARGS))method_test,1);
+	rb_define_singleton_method(s2_parse, "s2_parse_compile_to_ast", (VALUE(*)(ANYARGS))method_compile_to_ast,1);
 }
