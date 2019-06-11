@@ -30,6 +30,10 @@ module S2
       info['_col']
     end
 
+    def imported_by
+      info['_imported_by']
+    end
+
     def source
       @source ||= File.read(filename)
     end
@@ -71,8 +75,13 @@ module S2
       extra
     end
 
+    def imported_by_outputs
+      imported_by.reverse.map { |x| "imported by: #{x}" }
+    end
+
     def output
       [
+        imported_by_outputs,
         error_title_outputs,
         source_view_outputs,
         explain_outputs,

@@ -32,12 +32,25 @@ end
 class FileAST
   attr_reader :dir, :name, :contents, :raw_contents
 
-  def initialize(absolute_path)
+  def initialize(absolute_path, imported_by_map = {})
     @dir = File.dirname(absolute_path)
     @name = absolute_path
     @raw_contents = File.read(absolute_path)
     @contents = JSON.parse(S2::S2Parse.compile_to_ast(@raw_contents))
     @contents['_file'] = absolute_path
+    @contents['_imported_by'] = imported_by_array(imported_by_map)
+  end
+
+  def imported_by_array(imported_by_map)
+    arr = []
+    curr = @name
+    loop do
+      curr = imported_by_map[curr]
+      break unless curr
+
+      arr << curr
+    end
+    arr
   end
 
   def valid?
@@ -92,7 +105,7 @@ class S2AST
     loop do
       name = @unread_files.shift
 
-      ast = FileAST.new(name)
+      ast = FileAST.new(name, @imported_by_map)
       @read_files[name] = ast
       @error_file = ast unless ast.valid?
       importables = ast.imports.map(&:absolute_path)
